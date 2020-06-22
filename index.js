@@ -33,7 +33,10 @@ let persons = [
   }
 
   app.use(express.json()) //parses JSON data
-  app.use(morgan('tiny')) //logs activity
+  morgan.token('data', (req, res) => {
+    return JSON.stringify(req.body)
+  })
+  app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data')) //logs activity
 
   app.post('/api/persons', (request, response) => {
     const body = request.body
