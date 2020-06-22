@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 const { request, response } = require('express');
 const app = express()
 
@@ -31,7 +32,8 @@ let persons = [
     return newID
   }
 
-  app.use(express.json())
+  app.use(express.json()) //parses JSON data
+  app.use(morgan('tiny')) //logs activity
 
   app.post('/api/persons', (request, response) => {
     const body = request.body
