@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors')
 const { request, response } = require('express');
 const app = express()
 
@@ -26,17 +27,21 @@ let persons = [
     }
   ];
 
+
+
+  app.use(express.json()) //parses JSON data
+  app.use(cors()) //cross origin resource sharing
+
+  morgan.token('data', (req, res) => {
+    return JSON.stringify(req.body)
+  })
+  app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data')) //logs activity
+  
   const generateID = () => {
     const maxNum = Number.MAX_SAFE_INTEGER
     const newID =  Math.floor(Math.random(10) * maxNum)
     return newID
   }
-
-  app.use(express.json()) //parses JSON data
-  morgan.token('data', (req, res) => {
-    return JSON.stringify(req.body)
-  })
-  app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data')) //logs activity
 
   app.post('/api/persons', (request, response) => {
     const body = request.body
