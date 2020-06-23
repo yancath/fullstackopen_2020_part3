@@ -31,6 +31,7 @@ let persons = [
 
   app.use(express.json()) //parses JSON data
   app.use(cors()) //cross origin resource sharing
+  app.use(express.static('build')) //for static file reading
 
   morgan.token('data', (req, res) => {
     return JSON.stringify(req.body)
@@ -74,8 +75,8 @@ let persons = [
     response.json(person)
   })
 
-  app.get('/', (req, res) => {
-    res.send('<h1>Hello World!</h1>')
+  app.get('/', (request, response) => {
+    response.send('<h1>Hello World!</h1>')
   })
 
   app.get('/api/persons', (request, response) => {
