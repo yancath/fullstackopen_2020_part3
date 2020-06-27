@@ -51,32 +51,24 @@ let persons = [
   app.post('/api/persons', (request, response) => {
     const body = request.body
 
-    if (!body.name) {
+    if (body.name === undefined) {
       return response.status(400).json({ 
         error: 'content missing' 
       })
-    } else if (!body.number) {
+    } else if (body.number === undefined) {
       return response.status(400).json({ 
         error: 'content missing' 
       })
     }
-    
-    const everyPerson = persons.map(person => person.name.toLowerCase())
 
-    if (everyPerson.includes(body.name.toLowerCase())) {
-      return response.status(400).json({ 
-        error: 'name must be unique' 
-      })
-    }
-
-    const person = {
+    const person = new Person({ //new person obj based off the schema
       name: body.name,
-      number: body.number,
-      id: generateID(),
-    }
+      number: body.number
+    })
     
-    persons = persons.concat(person)
-    response.json(person)
+    person.save().then(savedPerson => {
+      response.json(savedPerson)
+    })
   })
 
   app.get('/', (request, response) => {
@@ -98,14 +90,9 @@ let persons = [
   })
 
   app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-
-    if (person) {
-        response.json(person)
-      } else {
-        response.status(404).end()
-      }
+    Person.findById(request.params.id).then(person => { //in Person model, find by given id
+      response.json(person)
+    })
   })
 
   app.delete('/api/persons/:id', (request, response) => {
