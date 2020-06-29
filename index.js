@@ -33,7 +33,15 @@ const Person = require('./models/person')
       return response.status(400).json({ 
         error: 'content missing' 
       })
-    } 
+    } else if (body.name.length < 3) {
+      return response.status(400).json({
+        error: 'name must be greater than 3 characters'
+      })
+    } else if (body.number.length < 8) {
+      return response.status(400).json({
+        error: 'phone number must be greater than 8 characters'
+      })
+    }
 
     Person.find({name:body.name}).then(name => {
       if (name.length !== 0) {
@@ -109,7 +117,10 @@ const Person = require('./models/person')
 
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
       return response.status(400).send({ error: 'malformatted id' })
-    } 
+    } else if (error.name === 'ValidationError') {
+      console.log("validation error response");
+      return response.status(400).json({ error: error.message })
+  }
     next(error)
   }
   app.use(errorHandler)
