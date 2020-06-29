@@ -22,7 +22,7 @@ const Person = require('./models/person')
     return newID
   }
 
-  app.post('/api/persons', (request, response) => {
+  app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (body.name === undefined) {
@@ -33,16 +33,30 @@ const Person = require('./models/person')
       return response.status(400).json({ 
         error: 'content missing' 
       })
+    } 
+
+    Person.find({name:body.name}).then(name => {
+      if (name.length !== 0) {
+        return response.status(400).json({ 
+          error: 'name must be unique' 
+    })
     }
+  })
 
     const person = new Person({ //new person obj based off the schema
       name: body.name,
       number: body.number
     })
     
-    person.save().then(savedPerson => {
-      response.json(savedPerson)
+    person
+    .save()
+    .then(savedPerson => {
+      return savedPerson.toJSON()
     })
+    .then(savedFormattedPerson => {
+      response.json(savedFormattedPerson)
+    })
+    .catch(error => next(error))
   })
 
   app.get('/api/persons', (request, response) => {
@@ -96,7 +110,6 @@ const Person = require('./models/person')
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
       return response.status(400).send({ error: 'malformatted id' })
     } 
-
     next(error)
   }
   app.use(errorHandler)
@@ -105,5 +118,3 @@ const Person = require('./models/person')
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
-
-  
